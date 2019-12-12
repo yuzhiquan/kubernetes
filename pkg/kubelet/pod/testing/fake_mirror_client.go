@@ -91,7 +91,7 @@ type MockCheckpointManager struct {
 }
 
 func (ckm *MockCheckpointManager) CreateCheckpoint(checkpointKey string, checkpoint checkpointmanager.Checkpoint) error {
-	ckm.checkpoint[checkpointKey] = (checkpoint.(*cp.Data))
+	ckm.checkpoint[checkpointKey] = checkpoint.(*cp.Data)
 	return nil
 }
 
