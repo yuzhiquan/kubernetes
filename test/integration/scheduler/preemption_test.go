@@ -39,8 +39,8 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	featuregatetesting "k8s.io/component-base/featuregate/testing"
+	corev1helpers "k8s.io/component-helpers/node/corev1"
 	"k8s.io/klog/v2"
-	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
 	"k8s.io/kubernetes/pkg/apis/scheduling"
 	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/scheduler"
@@ -912,7 +912,7 @@ func TestPreemptionRaces(t *testing.T) {
 					if len(pod.Spec.NodeName) > 0 {
 						t.Errorf("Pod %v/%v is already scheduled", p.Namespace, p.Name)
 					}
-					_, cond := podutil.GetPodCondition(&pod.Status, v1.PodScheduled)
+					_, cond := corev1helpers.GetPodCondition(&pod.Status, v1.PodScheduled)
 					if cond != nil && cond.Status != v1.ConditionFalse {
 						t.Errorf("Pod %v/%v is no longer unschedulable: %v", p.Namespace, p.Name, err)
 					}

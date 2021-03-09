@@ -43,7 +43,7 @@ import (
 	corelisters "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
-	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
+	corev1helpers "k8s.io/component-helpers/node/corev1"
 	"k8s.io/kubernetes/pkg/controller"
 	"k8s.io/kubernetes/pkg/controller/history"
 )
@@ -1682,7 +1682,7 @@ func (spc *fakeStatefulPodControl) setPodReady(set *apps.StatefulSet, ordinal in
 	sort.Sort(ascendingOrdinal(pods))
 	pod := pods[ordinal].DeepCopy()
 	condition := v1.PodCondition{Type: v1.PodReady, Status: v1.ConditionTrue}
-	podutil.UpdatePodCondition(&pod.Status, &condition)
+	corev1helpers.UpdatePodCondition(&pod.Status, &condition)
 	fakeResourceVersion(pod)
 	spc.podsIndexer.Update(pod)
 	return spc.podsLister.Pods(set.Namespace).List(selector)
@@ -1695,7 +1695,7 @@ func (spc *fakeStatefulPodControl) addTerminatingPod(set *apps.StatefulSet, ordi
 	pod.DeletionTimestamp = &deleted
 	condition := v1.PodCondition{Type: v1.PodReady, Status: v1.ConditionTrue}
 	fakeResourceVersion(pod)
-	podutil.UpdatePodCondition(&pod.Status, &condition)
+	corev1helpers.UpdatePodCondition(&pod.Status, &condition)
 	spc.podsIndexer.Update(pod)
 	selector, err := metav1.LabelSelectorAsSelector(set.Spec.Selector)
 	if err != nil {
