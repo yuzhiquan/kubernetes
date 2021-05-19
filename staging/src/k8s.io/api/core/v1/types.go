@@ -2105,6 +2105,20 @@ type TCPSocketAction struct {
 	Host string `json:"host,omitempty" protobuf:"bytes,2,opt,name=host"`
 }
 
+type GRPCAction struct {
+	// Port number of the gRPC service. Number must be in the range 1 to 65535.
+	Port int32 `json:"port" protobuf:"bytes,1,opt,name=port"`
+
+	// Service is the name of the service to place in the gRPC HealthCheckRequest
+	// (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+	//
+	// The service name can be the empty string (i.e. "").
+	Service string `json:"service" protobuf:"bytes,2,opt,name=service"`
+
+	// Host is the host name to connect to, defaults to the Pod's IP.
+	Host string `json:"host,omitempty" protobuf:"bytes,3,opt,name=host"`
+}
+
 // ExecAction describes a "run in container" action.
 type ExecAction struct {
 	// Command is the command line to execute inside the container, the working directory for the
@@ -2398,6 +2412,10 @@ type Handler struct {
 	// TODO: implement a realistic TCP lifecycle hook
 	// +optional
 	TCPSocket *TCPSocketAction `json:"tcpSocket,omitempty" protobuf:"bytes,3,opt,name=tcpSocket"`
+
+	// GRPC specifies an action involving a GRPC port.
+	// +optional
+	GRPC *GRPCAction `json:"grpc,omitempty" protobuf:"bytes,4,opt,name=grpc"`
 }
 
 // Lifecycle describes actions that the management system should take in response to container lifecycle

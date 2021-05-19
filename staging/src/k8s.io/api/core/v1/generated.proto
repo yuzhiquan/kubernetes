@@ -1641,6 +1641,20 @@ message GCEPersistentDiskVolumeSource {
   optional bool readOnly = 4;
 }
 
+message GRPCAction {
+  // Port number of the gRPC service. Number must be in the range 1 to 65535.
+  optional int32 port = 1;
+
+  // Service is the name of the service to place in the gRPC HealthCheckRequest
+  // (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+  //
+  // The service name can be the empty string (i.e. "").
+  optional string service = 2;
+
+  // Host is the host name to connect to, defaults to the Pod's IP.
+  optional string host = 3;
+}
+
 // Represents a volume that is populated with the contents of a git repository.
 // Git repo volumes do not support ownership management.
 // Git repo volumes support SELinux relabeling.
@@ -1758,6 +1772,10 @@ message Handler {
   // TODO: implement a realistic TCP lifecycle hook
   // +optional
   optional TCPSocketAction tcpSocket = 3;
+
+  // GRPC specifies an action involving a GRPC port.
+  // +optional
+  optional GRPCAction grpc = 4;
 }
 
 // HostAlias holds the mapping between IP and hostnames that will be injected as an entry in the

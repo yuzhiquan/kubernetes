@@ -2764,6 +2764,13 @@ func validateTCPSocketAction(tcp *core.TCPSocketAction, fldPath *field.Path) fie
 	return ValidatePortNumOrName(tcp.Port, fldPath.Child("port"))
 }
 
+func validateGRPCAction(grpc *core.GRPCAction, fldPath *field.Path) field.ErrorList {
+	return ValidatePortNumOrName(intstr.IntOrString{
+		Type:   intstr.Int,
+		IntVal: int32(grpc.Port),
+	}, fldPath.Child("port"))
+}
+
 func validateHandler(handler *core.Handler, fldPath *field.Path) field.ErrorList {
 	numHandlers := 0
 	allErrors := field.ErrorList{}
@@ -2789,6 +2796,14 @@ func validateHandler(handler *core.Handler, fldPath *field.Path) field.ErrorList
 		} else {
 			numHandlers++
 			allErrors = append(allErrors, validateTCPSocketAction(handler.TCPSocket, fldPath.Child("tcpSocket"))...)
+		}
+	}
+	if handler.GRPC != nil {
+		if numHandlers > 0 {
+			allErrors = append(allErrors, field.Forbidden(fldPath.Child("grpc"), "may not specify more than 1 handler type"))
+		} else {
+			numHandlers++
+			allErrors = append(allErrors, validateGRPCAction(handler.GRPC, fldPath.Child("grpc"))...)
 		}
 	}
 	if numHandlers == 0 {

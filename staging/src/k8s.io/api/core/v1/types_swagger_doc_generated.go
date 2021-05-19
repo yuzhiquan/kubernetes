@@ -749,6 +749,16 @@ func (GCEPersistentDiskVolumeSource) SwaggerDoc() map[string]string {
 	return map_GCEPersistentDiskVolumeSource
 }
 
+var map_GRPCAction = map[string]string{
+	"port":    "Port number of the gRPC service. Number must be in the range 1 to 65535.",
+	"service": "Service is the name of the service to place in the gRPC HealthCheckRequest (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).\n\nThe service name can be the empty string (i.e. \"\").",
+	"host":    "Host is the host name to connect to, defaults to the Pod's IP.",
+}
+
+func (GRPCAction) SwaggerDoc() map[string]string {
+	return map_GRPCAction
+}
+
 var map_GitRepoVolumeSource = map[string]string{
 	"":           "Represents a volume that is populated with the contents of a git repository. Git repo volumes do not support ownership management. Git repo volumes support SELinux relabeling.\n\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an EmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir into the Pod's container.",
 	"repository": "Repository URL",
@@ -811,6 +821,7 @@ var map_Handler = map[string]string{
 	"exec":      "One and only one of the following should be specified. Exec specifies the action to take.",
 	"httpGet":   "HTTPGet specifies the http request to perform.",
 	"tcpSocket": "TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported",
+	"grpc":      "GRPC specifies an action involving a GRPC port.",
 }
 
 func (Handler) SwaggerDoc() map[string]string {

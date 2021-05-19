@@ -28,13 +28,16 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	"k8s.io/client-go/tools/record"
+	kubefeatures "k8s.io/kubernetes/pkg/features"
 	kubecontainer "k8s.io/kubernetes/pkg/kubelet/container"
 	"k8s.io/kubernetes/pkg/kubelet/events"
 	"k8s.io/kubernetes/pkg/kubelet/prober/results"
 	"k8s.io/kubernetes/pkg/kubelet/util/format"
 	"k8s.io/kubernetes/pkg/probe"
 	execprobe "k8s.io/kubernetes/pkg/probe/exec"
+	grpcprobe "k8s.io/kubernetes/pkg/probe/grpc"
 	httpprobe "k8s.io/kubernetes/pkg/probe/http"
 	tcpprobe "k8s.io/kubernetes/pkg/probe/tcp"
 	"k8s.io/utils/exec"
@@ -54,6 +57,7 @@ type prober struct {
 	livenessHTTP  httpprobe.Prober
 	startupHTTP   httpprobe.Prober
 	tcp           tcpprobe.Prober
+	grpc          grpcprobe.Prober
 	runner        kubecontainer.CommandRunner
 
 	recorder record.EventRecorder
@@ -72,6 +76,7 @@ func newProber(
 		livenessHTTP:  httpprobe.New(followNonLocalRedirects),
 		startupHTTP:   httpprobe.New(followNonLocalRedirects),
 		tcp:           tcpprobe.New(),
+		grpc:          grpcprobe.New(),
 		runner:        runner,
 		recorder:      recorder,
 	}
@@ -195,6 +200,24 @@ func (pb *prober) runProbe(probeType probeType, p *v1.Probe, pod *v1.Pod, status
 		klog.V(4).InfoS("TCP-Probe Host", "host", host, "port", port, "timeout", timeout)
 		return pb.tcp.Probe(host, port, timeout)
 	}
+
+	if utilfeature.DefaultFeatureGate.Enabled(kubefeatures.GRPCContainerProbe) && p.GRPC != nil {
+		port, err := extractPort(intstr.IntOrString{
+			Type:   intstr.Int,
+			IntVal: int32(p.GRPC.Port),
+		}, container)
+		if err != nil {
+			return probe.Unknown, "", err
+		}
+		host := p.GRPC.Host
+		if host == "" {
+			host = status.PodIP
+		}
+		service := p.GRPC.Service
+		klog.V(4).InfoS("GRPC-Probe", "host", host, "service", service, "port", port, "timeout", timeout)
+		return pb.grpc.Probe(host, service, port, timeout)
+	}
+
 	klog.InfoS("Failed to find probe builder for container", "containerName", container.Name)
 	return probe.Unknown, "", fmt.Errorf("missing probe handler for %s:%s", format.Pod(pod), container.Name)
 }

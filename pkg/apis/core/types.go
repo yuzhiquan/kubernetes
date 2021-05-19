@@ -2205,6 +2205,24 @@ type Handler struct {
 	// TODO: implement a realistic TCP lifecycle hook
 	// +optional
 	TCPSocket *TCPSocketAction
+
+	// GRPC specifies an action involving a GRPC port.
+	// +optional
+	GRPC *GRPCAction
+}
+
+type GRPCAction struct {
+	// Port number of the gRPC service. Number must be in the range 1 to 65535.
+	Port int32
+
+	// Service is the name of the service to place in the gRPC HealthCheckRequest
+	// (see https://github.com/grpc/grpc/blob/master/doc/health-checking.md).
+	//
+	// The service name can be the empty string (i.e. "").
+	Service string
+
+	// Host is the host name to connect to, defaults to the Pod's IP.
+	Host string
 }
 
 // Lifecycle describes actions that the management system should take in response to container lifecycle

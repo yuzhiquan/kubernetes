@@ -555,6 +555,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &applyconfigurationscorev1.GlusterfsPersistentVolumeSourceApplyConfiguration{}
 	case corev1.SchemeGroupVersion.WithKind("GlusterfsVolumeSource"):
 		return &applyconfigurationscorev1.GlusterfsVolumeSourceApplyConfiguration{}
+	case corev1.SchemeGroupVersion.WithKind("GRPCAction"):
+		return &applyconfigurationscorev1.GRPCActionApplyConfiguration{}
 	case corev1.SchemeGroupVersion.WithKind("Handler"):
 		return &applyconfigurationscorev1.HandlerApplyConfiguration{}
 	case corev1.SchemeGroupVersion.WithKind("HostAlias"):
