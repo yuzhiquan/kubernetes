@@ -2414,8 +2414,10 @@ type Handler struct {
 	TCPSocket *TCPSocketAction `json:"tcpSocket,omitempty" protobuf:"bytes,3,opt,name=tcpSocket"`
 
 	// GRPC specifies an action involving a GRPC port.
+	// GRPC lifecycle hooks are not yet supported.
+	// This is an alpha field and requires enabling GRPCContainerProbe feature gate.
 	// +optional
-	GRPC *GRPCAction `json:"grpc,omitempty" protobuf:"bytes,4,opt,name=grpc"`
+	GRPC *GRPCAction `json:"gRPC,omitempty" protobuf:"bytes,4,opt,name=grpc"`
 }
 
 // Lifecycle describes actions that the management system should take in response to container lifecycle

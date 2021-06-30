@@ -215,7 +215,7 @@ var _ = SIGDescribe("Probing container", func() {
 		Testname: Pod liveness probe, using grpc call, failure
 		Description: A Pod is created with liveness probe on grpc service. Liveness probe on this endpoint will not fail. When liveness probe does not fail then the restart count MUST remain zero.
 	*/
-	framework.ConformanceIt("should *not* be restarted with a GRPC liveness probe [NodeConformance]", func() {
+	ginkgo.It("should *not* be restarted with a GRPC liveness probe [NodeConformance]", func() {
 		livenessProbe := &v1.Probe{
 			Handler:             GRPCGetHandler(2379, "", "127.0.0.1"),
 			InitialDelaySeconds: 30,

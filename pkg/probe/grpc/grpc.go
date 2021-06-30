@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/klog/v2"
 	"time"
 
 	"google.golang.org/grpc"
@@ -52,7 +53,7 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 	v := version.Get()
 
 	md := metadata.New(map[string]string{
-		"User-Agent": fmt.Sprintf("kubernetes/%s.%s", v.Major, v.Minor),
+		"User-Agent": fmt.Sprintf("kube-probe/%s.%s", v.Major, v.Minor),
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
@@ -62,7 +63,8 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", host, port), opts...)
 
 	if err != nil {
-		return probe.Failure, fmt.Sprintf("grpc probe DialContext() failure: %s", err.Error()), err
+		klog.ErrorS(err, "GRPC probe failed DialContext")
+		return probe.Failure, "", err
 	}
 
 	defer func() {
@@ -76,11 +78,12 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 	})
 
 	if err != nil {
-		return probe.Failure, fmt.Sprintf("GRPC probe failed make watchclient with error: %s", err.Error()), err
+		klog.ErrorS(err, "GRPC probe failed make client")
+		return probe.Failure, "", err
 	}
 
 	if resp.Status != grpchealth.HealthCheckResponse_SERVING {
-		return probe.Failure, fmt.Sprintf("GRPC probe failed with status: %s", resp.Status.String()), errGrpcNotServing
+		return probe.Failure, fmt.Sprintf("GRPC probe failed with status: %s", resp.Status.String()), nil
 	}
 
 	return probe.Success, fmt.Sprintf("GRPC probe success"), nil

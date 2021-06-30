@@ -24,7 +24,7 @@ type HandlerApplyConfiguration struct {
 	Exec      *ExecActionApplyConfiguration      `json:"exec,omitempty"`
 	HTTPGet   *HTTPGetActionApplyConfiguration   `json:"httpGet,omitempty"`
 	TCPSocket *TCPSocketActionApplyConfiguration `json:"tcpSocket,omitempty"`
-	GRPC      *GRPCActionApplyConfiguration      `json:"grpc,omitempty"`
+	GRPC      *GRPCActionApplyConfiguration      `json:"gRPC,omitempty"`
 }
 
 // HandlerApplyConfiguration constructs an declarative configuration of the Handler type for use with

@@ -4246,7 +4246,7 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: exec
       type:
         namedType: io.k8s.api.core.v1.ExecAction
-    - name: grpc
+    - name: gRPC
       type:
         namedType: io.k8s.api.core.v1.GRPCAction
     - name: httpGet
@@ -5607,7 +5607,7 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: failureThreshold
       type:
         scalar: numeric
-    - name: grpc
+    - name: gRPC
       type:
         namedType: io.k8s.api.core.v1.GRPCAction
     - name: httpGet

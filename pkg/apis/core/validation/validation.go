@@ -2798,12 +2798,12 @@ func validateHandler(handler *core.Handler, fldPath *field.Path) field.ErrorList
 			allErrors = append(allErrors, validateTCPSocketAction(handler.TCPSocket, fldPath.Child("tcpSocket"))...)
 		}
 	}
-	if handler.GRPC != nil {
+	if utilfeature.DefaultFeatureGate.Enabled(features.GRPCContainerProbe) && handler.GRPC != nil {
 		if numHandlers > 0 {
-			allErrors = append(allErrors, field.Forbidden(fldPath.Child("grpc"), "may not specify more than 1 handler type"))
+			allErrors = append(allErrors, field.Forbidden(fldPath.Child("gRPC"), "may not specify more than 1 handler type"))
 		} else {
 			numHandlers++
-			allErrors = append(allErrors, validateGRPCAction(handler.GRPC, fldPath.Child("grpc"))...)
+			allErrors = append(allErrors, validateGRPCAction(handler.GRPC, fldPath.Child("gRPC"))...)
 		}
 	}
 	if numHandlers == 0 {

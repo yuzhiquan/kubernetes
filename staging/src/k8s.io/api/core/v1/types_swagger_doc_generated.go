@@ -821,7 +821,7 @@ var map_Handler = map[string]string{
 	"exec":      "One and only one of the following should be specified. Exec specifies the action to take.",
 	"httpGet":   "HTTPGet specifies the http request to perform.",
 	"tcpSocket": "TCPSocket specifies an action involving a TCP port. TCP hooks not yet supported",
-	"grpc":      "GRPC specifies an action involving a GRPC port.",
+	"gRPC":      "GRPC specifies an action involving a GRPC port. GRPC lifecycle hooks are not yet supported. This is an alpha field and requires enabling GRPCContainerProbe feature gate.",
 }
 
 func (Handler) SwaggerDoc() map[string]string {

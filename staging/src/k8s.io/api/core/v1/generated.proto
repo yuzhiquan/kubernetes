@@ -1774,6 +1774,8 @@ message Handler {
   optional TCPSocketAction tcpSocket = 3;
 
   // GRPC specifies an action involving a GRPC port.
+  // GRPC lifecycle hooks are not yet supported.
+  // This is an alpha field and requires enabling GRPCContainerProbe feature gate.
   // +optional
   optional GRPCAction grpc = 4;
 }

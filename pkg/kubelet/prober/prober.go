@@ -175,7 +175,7 @@ func (pb *prober) runProbe(probeType probeType, p *v1.Probe, pod *v1.Pod, status
 			return probe.Unknown, "", err
 		}
 		path := p.HTTPGet.Path
-		klog.V(4).InfoS("HTTP-Probe Host", "scheme", scheme, "host", host, "port", port, "path", path)
+		klog.V(4).InfoS("HTTP-Probe", "scheme", scheme, "host", host, "port", port, "path", path, "timeout", timeout)
 		url := formatURL(scheme, host, port, path)
 		headers := buildHeader(p.HTTPGet.HTTPHeaders)
 		klog.V(4).InfoS("HTTP-Probe Headers", "headers", headers)
@@ -197,7 +197,7 @@ func (pb *prober) runProbe(probeType probeType, p *v1.Probe, pod *v1.Pod, status
 		if host == "" {
 			host = status.PodIP
 		}
-		klog.V(4).InfoS("TCP-Probe Host", "host", host, "port", port, "timeout", timeout)
+		klog.V(4).InfoS("TCP-Probe", "host", host, "port", port, "timeout", timeout)
 		return pb.tcp.Probe(host, port, timeout)
 	}
 

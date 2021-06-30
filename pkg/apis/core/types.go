@@ -2207,12 +2207,15 @@ type Handler struct {
 	TCPSocket *TCPSocketAction
 
 	// GRPC specifies an action involving a GRPC port.
+	// GRPC lifecycle hooks are not yet supported.
+	// This is an alpha field and requires enabling GRPCContainerProbe feature gate.
 	// +optional
 	GRPC *GRPCAction
 }
 
 type GRPCAction struct {
-	// Port number of the gRPC service. Number must be in the range 1 to 65535.
+	// Port number of the gRPC service.
+	// Note: Number must be in the range 1 to 65535.
 	Port int32
 
 	// Service is the name of the service to place in the gRPC HealthCheckRequest
