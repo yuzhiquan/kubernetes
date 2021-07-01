@@ -18,7 +18,6 @@ package grpc
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"k8s.io/klog/v2"
 	"time"
@@ -28,10 +27,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"k8s.io/component-base/version"
 	"k8s.io/kubernetes/pkg/probe"
-)
-
-var (
-	errGrpcNotServing = errors.New("GRPC_STATUS_NOT_SERVING")
 )
 
 // Prober is an interface that defines the Probe function for doing GRPC readiness/liveness checks.

@@ -28,17 +28,19 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/uuid"
+	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
+	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/kubelet/events"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2eevents "k8s.io/kubernetes/test/e2e/framework/events"
 	e2epod "k8s.io/kubernetes/test/e2e/framework/pod"
 	e2eskipper "k8s.io/kubernetes/test/e2e/framework/skipper"
 	testutils "k8s.io/kubernetes/test/utils"
+	imageutils "k8s.io/kubernetes/test/utils/image"
 
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
-	imageutils "k8s.io/kubernetes/test/utils/image"
 )
 
 const (
@@ -200,6 +202,10 @@ var _ = SIGDescribe("Probing container", func() {
 		Description: A Pod is created with liveness probe on http endpoint '/'. Liveness probe on this endpoint will not fail. When liveness probe does not fail then the restart count MUST remain zero.
 	*/
 	framework.ConformanceIt("should *not* be restarted with a /healthz http liveness probe [NodeConformance]", func() {
+		utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=%v", string(features.GRPCContainerProbe), true))
+		if !utilfeature.DefaultFeatureGate.Enabled(features.GRPCContainerProbe) {
+			framework.Failf("GRPCContainerProbe not correct set")
+		}
 		livenessProbe := &v1.Probe{
 			Handler:             httpGetHandler("/", 80),
 			InitialDelaySeconds: 15,
