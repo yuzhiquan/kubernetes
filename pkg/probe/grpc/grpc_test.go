@@ -102,9 +102,10 @@ func TestGrpcProber_Probe(t *testing.T) {
 		}()
 		// take some time to wait server boot
 		time.Sleep(2 * time.Second)
-		p, _, err := s.Probe("0.0.0.0", "", port, time.Second, grpc.WithInsecure())
+		p, o, err := s.Probe("0.0.0.0", "", port, time.Second, grpc.WithInsecure())
 		assert.Equal(t, probe.Failure, p)
-		assert.NotEqual(t, nil, err)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, "GRPC probe failed with status: NOT_SERVING", o)
 	})
 	t.Run("Should: return error because server not response in time", func(t *testing.T) {
 		s := New()
