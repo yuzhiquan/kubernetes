@@ -19,7 +19,6 @@ package node
 import (
 	"context"
 	"fmt"
-	"net"
 	"net/url"
 	"time"
 
@@ -28,9 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/uuid"
-	utilfeature "k8s.io/apiserver/pkg/util/feature"
 	podutil "k8s.io/kubernetes/pkg/api/v1/pod"
-	"k8s.io/kubernetes/pkg/features"
 	"k8s.io/kubernetes/pkg/kubelet/events"
 	"k8s.io/kubernetes/test/e2e/framework"
 	e2eevents "k8s.io/kubernetes/test/e2e/framework/events"
@@ -209,26 +206,6 @@ var _ = SIGDescribe("Probing container", func() {
 			FailureThreshold:    5, // to accommodate nodes which are slow in bringing up containers.
 		}
 		pod := testWebServerPodSpec(nil, livenessProbe, "test-webserver", 80)
-		RunLivenessTest(f, pod, 0, defaultObservationTimeout)
-	})
-
-	/*
-		Release: v1.22
-		Testname: Pod liveness probe, using grpc call, failure
-		Description: A Pod is created with liveness probe on grpc service. Liveness probe on this endpoint will not fail. When liveness probe does not fail then the restart count MUST remain zero.
-	*/
-	ginkgo.It("should *not* be restarted with a GRPC liveness probe [NodeConformance]", func() {
-		utilfeature.DefaultMutableFeatureGate.Set(fmt.Sprintf("%s=%v", string(features.GRPCContainerProbe), true))
-		if !utilfeature.DefaultFeatureGate.Enabled(features.GRPCContainerProbe) {
-			framework.Failf("GRPCContainerProbe not correct set")
-		}
-		livenessProbe := &v1.Probe{
-			Handler:             GRPCGetHandler(2379, "", "127.0.0.1"),
-			InitialDelaySeconds: 30,
-			TimeoutSeconds:      5,
-			FailureThreshold:    5, // to accommodate nodes which are slow in bringing up containers.
-		}
-		pod := testGRPCServerPodSpec(nil, livenessProbe, "etcd", 2379)
 		RunLivenessTest(f, pod, 0, defaultObservationTimeout)
 	})
 
@@ -605,35 +582,6 @@ func busyBoxPodSpec(readinessProbe, livenessProbe *v1.Probe, cmd []string) *v1.P
 	}
 }
 
-func testGRPCServerPodSpec(readinessProbe, livenessProbe *v1.Probe, containerName string, port int) *v1.Pod {
-	etcdLocalhostAddress := "127.0.0.1"
-	if framework.TestContext.ClusterIsIPv6() {
-		etcdLocalhostAddress = "::1"
-	}
-	etcdURL := fmt.Sprintf("http://%s", net.JoinHostPort(etcdLocalhostAddress, "2379"))
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{Name: "test-grpc-" + string(uuid.NewUUID())},
-		Spec: v1.PodSpec{
-			Containers: []v1.Container{
-				{
-					Name:  containerName,
-					Image: imageutils.GetE2EImage(imageutils.Etcd),
-					Command: []string{
-						"/usr/local/bin/etcd",
-						"--listen-client-urls",
-						etcdURL,
-						"--advertise-client-urls",
-						etcdURL,
-					},
-					Ports:          []v1.ContainerPort{{ContainerPort: int32(port)}},
-					LivenessProbe:  livenessProbe,
-					ReadinessProbe: readinessProbe,
-				},
-			},
-		},
-	}
-}
-
 func livenessPodSpec(namespace string, readinessProbe, livenessProbe *v1.Probe) *v1.Pod {
 	pod := e2epod.NewAgnhostPod(namespace, "liveness-"+string(uuid.NewUUID()), nil, nil, nil, "liveness")
 	pod.ObjectMeta.Labels = map[string]string{"test": "liveness"}
@@ -676,16 +624,6 @@ func httpGetHandler(path string, port int) v1.Handler {
 		HTTPGet: &v1.HTTPGetAction{
 			Path: path,
 			Port: intstr.FromInt(port),
-		},
-	}
-}
-
-func GRPCGetHandler(port int32, service, host string) v1.Handler {
-	return v1.Handler{
-		GRPC: &v1.GRPCAction{
-			Port:    port,
-			Service: service,
-			Host:    host,
 		},
 	}
 }
