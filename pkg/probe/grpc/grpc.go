@@ -19,6 +19,8 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"k8s.io/klog/v2"
 	"time"
 
@@ -44,6 +46,8 @@ func New() Prober {
 
 // Probe executes a grpc call to check the liveness/readiness of container.
 // Returns the Result status, command output, and errors if any.
+// Only return non-nil error when service is unavailable and/or not implementing the interface
+// Otherwise result status is failed,BUT err is nil
 func (p grpcProber) Probe(host, service string, port int, timeout time.Duration, opts ...grpc.DialOption) (probe.Result, string, error) {
 	v := version.Get()
 
@@ -55,11 +59,16 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 
 	defer cancel()
 
-	conn, err := grpc.DialContext(ctx, fmt.Sprintf("%s:%d", host, port), opts...)
+	addr := fmt.Sprintf("%s:%d", host, port)
+	conn, err := grpc.DialContext(ctx, addr, opts...)
 
 	if err != nil {
-		klog.ErrorS(err, "GRPC probe failed DialContext")
-		return probe.Failure, "", err
+		if err == context.DeadlineExceeded {
+			klog.ErrorS(err, "failed to connect grpc service due to timeout", "service", addr, "timeout", timeout)
+		} else {
+			klog.ErrorS(err, "failed to connect grpc service", "service", addr)
+		}
+		return probe.Failure, fmt.Sprintf("GRPC probe failed to dial: %s", err), nil
 	}
 
 	defer func() {
@@ -73,7 +82,20 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 	})
 
 	if err != nil {
-		klog.ErrorS(err, "GRPC probe failed make client")
+		state, ok := status.FromError(err)
+		if ok {
+			switch state.Code() {
+			case codes.Unimplemented:
+				klog.ErrorS(err, "server does not implement the grpc health protocol (grpc.health.v1.Health)", "addr", addr, "service", service)
+			case codes.DeadlineExceeded:
+				klog.ErrorS(err, "health rpc not finished within timeout", "addr", addr, "service", service, "timeout", timeout)
+			default:
+				klog.ErrorS(err, "health rpc failed")
+			}
+		} else {
+			klog.ErrorS(err, "health rpc failed")
+		}
+
 		return probe.Failure, "", err
 	}
 

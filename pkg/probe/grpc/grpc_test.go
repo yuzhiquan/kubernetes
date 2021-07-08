@@ -84,13 +84,13 @@ func (e errorNotServeServerMock) Watch(_ *grpchealth.HealthCheckRequest, stream 
 }
 
 func TestGrpcProber_Probe(t *testing.T) {
-	t.Run("Should: return error because cant find host", func(t *testing.T) {
+	t.Run("Should: failed but return nil error because cant find host", func(t *testing.T) {
 		s := New()
 		p, _, err := s.Probe("", "", 32, time.Second, grpc.WithInsecure(), grpc.WithBlock())
 		assert.Equal(t, probe.Failure, p)
-		assert.NotEqual(t, nil, err)
+		assert.Equal(t, nil, err)
 	})
-	t.Run("Should: return error because server response not served", func(t *testing.T) {
+	t.Run("Should: return non-nil error because server response not served", func(t *testing.T) {
 		s := New()
 		lis, _ := net.Listen("tcp", ":10413")
 		port := lis.Addr().(*net.TCPAddr).Port
