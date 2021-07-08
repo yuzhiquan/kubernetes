@@ -19,15 +19,15 @@ package grpc
 import (
 	"context"
 	"fmt"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"k8s.io/klog/v2"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	grpchealth "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"k8s.io/component-base/version"
+	"k8s.io/klog/v2"
 	"k8s.io/kubernetes/pkg/probe"
 )
 
@@ -88,19 +88,19 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 			case codes.Unimplemented:
 				klog.ErrorS(err, "server does not implement the grpc health protocol (grpc.health.v1.Health)", "addr", addr, "service", service)
 			case codes.DeadlineExceeded:
-				klog.ErrorS(err, "health rpc not finished within timeout", "addr", addr, "service", service, "timeout", timeout)
+				klog.ErrorS(err, "rpc request not finished within timeout", "addr", addr, "service", service, "timeout", timeout)
 			default:
-				klog.ErrorS(err, "health rpc failed")
+				klog.ErrorS(err, "rpc probe failed")
 			}
 		} else {
-			klog.ErrorS(err, "health rpc failed")
+			klog.ErrorS(err, "health rpc probe failed")
 		}
 
-		return probe.Failure, "", err
+		return probe.Failure, fmt.Sprintf("health rpc probe failed:%v", err), nil
 	}
 
 	if resp.Status != grpchealth.HealthCheckResponse_SERVING {
-		return probe.Failure, fmt.Sprintf("GRPC probe failed with status: %s", resp.Status.String()), nil
+		return probe.Failure, "", fmt.Errorf("GRPC probe failed with status: %s", resp.Status.String())
 	}
 
 	return probe.Success, fmt.Sprintf("GRPC probe success"), nil

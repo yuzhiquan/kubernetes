@@ -2209,6 +2209,7 @@ type Handler struct {
 	// GRPC specifies an action involving a GRPC port.
 	// GRPC lifecycle hooks are not yet supported.
 	// This is an alpha field and requires enabling GRPCContainerProbe feature gate.
+	// +featureGate=GRPCContainerProbe
 	// +optional
 	GRPC *GRPCAction
 }
