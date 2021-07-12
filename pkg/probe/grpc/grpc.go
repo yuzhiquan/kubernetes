@@ -96,11 +96,11 @@ func (p grpcProber) Probe(host, service string, port int, timeout time.Duration,
 			klog.ErrorS(err, "health rpc probe failed")
 		}
 
-		return probe.Failure, fmt.Sprintf("health rpc probe failed:%v", err), nil
+		return probe.Failure, "", fmt.Errorf("health rpc probe failed:%v", err)
 	}
 
 	if resp.Status != grpchealth.HealthCheckResponse_SERVING {
-		return probe.Failure, "", fmt.Errorf("GRPC probe failed with status: %s", resp.Status.String())
+		return probe.Failure, fmt.Sprintf("GRPC probe failed with status: %s", resp.Status.String()), nil
 	}
 
 	return probe.Success, fmt.Sprintf("GRPC probe success"), nil

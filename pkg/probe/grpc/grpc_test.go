@@ -104,8 +104,8 @@ func TestGrpcProber_Probe(t *testing.T) {
 		time.Sleep(2 * time.Second)
 		p, o, err := s.Probe("0.0.0.0", "", port, time.Second, grpc.WithInsecure())
 		assert.Equal(t, probe.Failure, p)
-		assert.NotEqual(t, nil, err)
-		assert.Equal(t, "", o)
+		assert.Equal(t, nil, err)
+		assert.Equal(t, "GRPC probe failed with status: NOT_SERVING", o)
 	})
 	t.Run("Should: return nil-error because server not response in time", func(t *testing.T) {
 		s := New()
@@ -122,8 +122,8 @@ func TestGrpcProber_Probe(t *testing.T) {
 		time.Sleep(2 * time.Second)
 		p, o, err := s.Probe("0.0.0.0", "", port, time.Second*2, grpc.WithInsecure())
 		assert.Equal(t, probe.Failure, p)
-		assert.Equal(t, nil, err)
-		assert.Equal(t, "health rpc probe failed:rpc error: code = DeadlineExceeded desc = context deadline exceeded", o)
+		assert.NotEqual(t, nil, err)
+		assert.Equal(t, "", o)
 
 	})
 	t.Run("Should: not return error because check was success", func(t *testing.T) {
