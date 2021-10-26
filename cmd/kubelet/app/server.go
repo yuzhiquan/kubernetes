@@ -305,8 +305,9 @@ HTTP server: The kubelet can also listen for HTTP and respond to a simple API
 	options.AddGlobalFlags(cleanFlagSet)
 	cleanFlagSet.BoolP("help", "h", false, fmt.Sprintf("help for %s", cmd.Name()))
 
+	cleanFlagSet.SortFlags = false
 	cliflag.PrintFlags(cleanFlagSet)
-	
+
 	// ugly, but necessary, because Cobra's default UsageFunc and HelpFunc pollute the flagset with global flags
 	const usageFmt = "Usage:\n  %s\n\nFlags:\n%s"
 	cmd.SetUsageFunc(func(cmd *cobra.Command) error {
